@@ -2,15 +2,16 @@
   "name": "zslog-js",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@types/cls-hooked": "^4.3.8",
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.0.0",
     "@types/source-map-support": "^0.5.10",
     "esbuild": "^0.20.0",
@@ -21,5 +22,8 @@
   "dependencies": {
     "cls-hooked": "^4.2.2",
     "source-map-support": "^0.5.21"
+  },
+  "jest": {
+    "preset": "ts-jest"
   }
 }

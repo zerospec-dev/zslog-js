@@ -22,8 +22,4 @@ export interface Logger {
   error(message: string, info?: AdditionalInfo): void;
 
   fatal(message: string, info?: AdditionalInfo): void;
-
-  setMdc(key: string, value: unknown): void;
-
-  removeMdc(key: string): void;
 }
