@@ -1,37 +1,39 @@
-import * as cls from 'cls-hooked';
+export type NextFunction = () => void;
 
-const ns = cls.createNamespace('9f5bbd3c-6179-579c-1c2a-fef8b88bc96a');
-const MDC_KEY = 'mdc';
+const uninitialized = () => {
+  throw new Error('call use() before using MDC');
+};
 
-type NextFunction = () => void;
+let func: {
+  set: (key: string, value: unknown) => void;
+  remove: (key: string) => void;
+  getAll: () => {[key: string]: unknown} | undefined;
+} = {
+  set: uninitialized,
+  remove: uninitialized,
+  getAll: () => undefined,
+};
 
-export const use = (next: NextFunction) => {
-  ns.run(() => {
-    try {
-      ns.set(MDC_KEY, new Map<string, unknown>());
-      next();
-    } finally {
-      ns.set(MDC_KEY, undefined);
+export const use = (next: NextFunction, mode: 'lambda'|'server'|'auto' = 'auto') => {
+  const { use: _use, set: _set, remove: _remove, getAll: _getAll} = (() => {
+    if (mode === 'lambda' || mode === 'auto' && process.env.AWS_LAMBDA_FUNCTION_NAME != null) {
+      return require('./internal/singleton-mdc');
+    } else {
+      return require('./internal/thread-local-mdc');
     }
-  });
+  })();
+
+  func = { set: _set, remove: _remove, getAll: _getAll };
+
+  _use(next);
 };
 
 export const middleware = (req: unknown, res: unknown, next: NextFunction) => {
   use(next);
 };
 
-const getMdc = () => {
-  return ns.get(MDC_KEY) as Map<string, unknown>;
-};
+export const set = (key: string, value: unknown) => func.set(key, value);
 
-export const get = () => {
-  return new Map(getMdc());
-};
+export const remove = (key: string) => func.remove(key);
 
-export const set = (key: string, value: unknown) => {
-  return getMdc().set(key, value);
-};
-
-export const remove = (key: string) => {
-  return getMdc().delete(key);
-};
+export const getAll = () => func.getAll();

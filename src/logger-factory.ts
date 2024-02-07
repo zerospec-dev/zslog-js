@@ -7,6 +7,7 @@ import { BasicLogger } from './basic-logger';
 import { Config } from './config';
 import { Logger } from "./logger";
 import { LoggerConfig } from './logger-config';
+import { rlevels } from './level';
 
 const sources = [
   () => process.env.ZSLOG_CONFIG,
@@ -78,6 +79,11 @@ export class LoggerFactory {
 
     if (config.loggers.default == null) {
       throw new Error('default sections is not defined in config.loggers');
+    }
+    for (const value of Object.values(config.loggers)) {
+      if (rlevels[value.level?.toLowerCase()] === undefined) {
+        throw new Error('unknown level: ' + value.level);
+      }
     }
 
     this.configs.clear();

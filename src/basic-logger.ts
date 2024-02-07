@@ -1,10 +1,11 @@
+import 'source-map-support/register';
 import * as fs from 'fs';
 
 import { levels, rlevels } from "./level";
 import { AdditionalInfo, Logger } from "./logger";
 import { LoggerConfig } from "./logger-config";
 import { LoggerFactory } from "./logger-factory";
-import { get } from './mdc';
+import { getAll } from './mdc';
 
 export class BasicLogger implements Logger {
   private version: number = -1;
@@ -76,18 +77,17 @@ export class BasicLogger implements Logger {
     const ts = now.getTime() / 1000;
     const caller = this.getCaller();
     const levelName = level.toUpperCase();
-    const ctx: {[key: string]: unknown} = {};
-    for (const [key, value] of get()) {
-      ctx[key] = value;
-    }
+    const ctx: {[key: string]: unknown} | undefined = getAll()
 
     if (this.config.json) {
       // fully json
-      const obj = Object.assign({}, info, { ts, level: levelName, msg: message, caller, name: this.section, ctx });
+      const obj: any = Object.assign({}, info, { ts, level: levelName, msg: message, caller, name: this.section, ctx });
+      if (ctx == null) delete obj.ctx;
       this.write(JSON.stringify(obj));
     } else {
       // format
-      const obj = Object.assign({}, info, { ctx });
+      const obj: any = Object.assign({}, info, { ctx });
+      if (ctx == null) delete obj.ctx;
       this.write(`${now.toISOString()} [${levelName.padEnd(5, ' ')}] ${this.section} ${caller}: ${message} ${JSON.stringify(obj)}`);
     }
   }
@@ -97,7 +97,21 @@ export class BasicLogger implements Logger {
   }
 
   private getCaller() {
-    return 'unknown';
+    const originalPrepareStackTrace = Error.prepareStackTrace;
+    const pattern = /(at .* \((?<file1>.+):(?<line1>[0-9]+):(?<column1>[0-9]+)\))|(at (?<file2>.+):(?<line2>[0-9]+):(?<column2>[0-9]+))$/;
+    try {
+      const info = new Error();
+
+      if (info.stack == null) return 'unknown';
+      const stack = info.stack.split('\n');
+      const cs = stack[4];
+      const groups = pattern.exec(cs)?.groups;
+      const fileName = groups?.file1 ?? groups?.file2 ?? 'unknown';
+      const lineNumber = groups?.line1 ?? groups?.line2 ?? 'unknown';
+      return `${fileName}:${lineNumber}`;
+    } finally {
+      Error.prepareStackTrace = originalPrepareStackTrace;
+    }
   }
 
   private write(text: string) {

@@ -1,0 +1,23 @@
+{
+  "sourceMaps": "inline",
+  "inlineSourcesContent": true,
+  "module": {
+    "type": "commonjs",
+    "strict": true,
+    "noInterop": false,
+    "lazy": false
+  },
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "dynamicImport": true,
+      "decorators": false
+    },
+    "transform": null,
+    "target": "es2022",
+    "externalHelpers": true,
+    "keepClassNames": true
+  },
+  "minify": false
+}

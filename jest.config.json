@@ -1,0 +1,6 @@
+{
+  "transform": {
+    "^.+\\.[jt]s$": ["@swc/jest"]
+  },
+  "testEnvironment": "node"
+}
