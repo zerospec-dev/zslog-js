@@ -3,8 +3,7 @@ import 'source-map-support/register';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { LoggerFactory } from "./logger-factory";
-import { set, use } from './mdc';
+import { LoggerFactory, MDC } from "./index";
 import { BasicLogger } from './basic-logger';
 
 // privateのコンストラクタを無視してインスタンスを作る
@@ -75,26 +74,26 @@ describe('logger-factory', () => {
     console.log(fs.readFileSync(filename).toString());
   });
 
-  it('write ctx by attached value', async () => {
+  it('write ctx by attached value', (done) => {
     let p1: Promise<void>;
     let p2: Promise<void>;
     let step1: () => void;
 
     const logger = sut.getOrCreateLogger('test.abc.def');
-    use(() => {
+    MDC.use(() => {
       // step 2を実行する
       p1 = new Promise<void>(resolve => {
         step1 = resolve;
-        set('step', 2);
+        MDC.set('step', 2);
         logger.debug('before step2');
       }).then(() => {
         logger.debug('after step2');
       });
     }, 'server');
-    use(() => {
+    MDC.use(() => {
       // step 1を実行する
       p2 = new Promise<void>(resolve => {
-        set('step', 1);
+        MDC.set('step', 1);
         logger.debug('after step1');
         resolve();
       }).then(() => {
@@ -102,7 +101,9 @@ describe('logger-factory', () => {
       });
     }, 'server');
 
-    await p1!;
-    console.log(fs.readFileSync(filename).toString());
+    p1!.then(() => {
+      console.log(fs.readFileSync(filename).toString());
+      done();
+    });
   });
 });
