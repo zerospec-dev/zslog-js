@@ -29,7 +29,8 @@ jobs:
       - uses: pnpm/action-setup@v2
         with:
           version: 8
-      - run: pnpm config --global set //npm.pkg.github.com:_authToken '${NODE_AUTH_TOKEN}'
+      - run: pnpm config --global set @zerospec-dev:registry https://npm.pkg.github.com/
+      - run: pnpm config --global set //npm.pkg.github.com/:_authToken '${NODE_AUTH_TOKEN}'
       - run: pnpm publish --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}

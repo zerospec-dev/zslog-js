@@ -1,0 +1,5 @@
+.github
+.nvmrc
+.swcrc
+jest.config.json
+src/**/*.test.ts
