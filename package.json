@@ -1,7 +1,8 @@
 {
-  "name": "zslog-js",
+  "name": "@zerospec-dev/zslog-js",
   "version": "0.0.1",
   "description": "",
+  "repository": "https://github.com/zerospec-dev/zslog-js.git",
   "main": "src/index.ts",
   "scripts": {
     "test": "jest",
